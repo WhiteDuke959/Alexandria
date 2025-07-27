@@ -268,7 +268,10 @@ def create_post(title, author, content,likes, tags=None):
 st.title(st.session_state.username)
 
 subs = count_subs()
-st.badge(f"{subs} subscribers.")
+st.markdown(
+    f"<span style='display:inline-block;background-color:#e0e0e0;color:#333;padding:4px 12px;border-radius:12px;font-size:14px;font-weight:bold;'>{subs} subscribers</span>",
+    unsafe_allow_html=True
+)
 def exi():
     st.session_state.logged_in = False
 with st.sidebar:
@@ -339,7 +342,11 @@ with st.form("Create Post"):
         else:
             st.error("Вам лучше переписать пост.")             
 
-st.badge("Your posts")
+st.markdown(
+    f"<span style='display:inline-block;background-color:#e0e0e0;color:#333;padding:4px 12px;border-radius:12px;font-size:14px;font-weight:bold;'>Your posts:</span>",
+    unsafe_allow_html=True
+)
+
 
 
 
