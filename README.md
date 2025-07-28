@@ -25,7 +25,7 @@ Alexandria это приложение, написанное на Python с ис
 <h3>🚀 Как запустить</h3>
 
 <pre><code>pip3 install -r requirements.txt
-streamlit run app.py</code></pre>
+streamlit run Alexandria.py</code></pre>
 
 <h3>🛠 Используемые технологии</h3>
 
@@ -65,7 +65,7 @@ Alexandria is a  social network built with <strong>Python</strong> and the <stro
 <h3>🚀 How to run</h3>
 
 <pre><code>pip install -r requirements.txt
-streamlit run app.py</code></pre>
+streamlit run Alexandria.py  </code></pre>
 
 <h3>🛠 Tech stack</h3>
 
