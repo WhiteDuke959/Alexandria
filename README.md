@@ -24,7 +24,7 @@ Alexandria это приложение, написанное на Python с ис
 
 <h3>🚀 Как запустить</h3>
 
-<pre><code>pip install -r requirements.txt
+<pre><code>pip3 install -r requirements.txt
 streamlit run app.py</code></pre>
 
 <h3>🛠 Используемые технологии</h3>
@@ -39,10 +39,8 @@ streamlit run app.py</code></pre>
 <h3>📁 Структура проекта</h3>
 
 <pre><code>.
-├── app.py               # Основной файл приложения
-├── components/          # Компоненты UI
-├── data/                # Файлы с данными пользователей и постов
-├── styles/              # Стили и кастомный HTML
+├── Alexandria.py               # Основной файл приложения
+├── pages/                # Файлы с данными пользователей и постов
 └── README.md            # Этот файл
 </code></pre>
 
@@ -81,7 +79,7 @@ streamlit run app.py</code></pre>
 <h3>📁 Project structure</h3>
 
 <pre><code>.
-├── Alxexandria.py               # Main application file          
+├── Alexandria.py               # Main application file          
 ├── pages/                       # Other code files   
 └── README.md            # This file
 </code></pre>
