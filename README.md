@@ -81,10 +81,8 @@ streamlit run app.py</code></pre>
 <h3>📁 Project structure</h3>
 
 <pre><code>.
-├── app.py               # Main application file
-├── components/          # UI components
-├── data/                # User and post data
-├── styles/              # CSS or HTML styles
+├── Alxexandria.py               # Main application file          
+├── pages/                       # Other code files   
 └── README.md            # This file
 </code></pre>
 
