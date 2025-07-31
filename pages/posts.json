@@ -1,17 +1,11 @@
 [
   {
-    "username":"test",
-     "posts": [
-       
-    ],
-    "titles": [
-      
-    ],
-    "likes": [
-      
-    ],
-    "photos":{},
-    "subscribers":[]
-    
-  }
+    "username": "iv",
+    "posts": [],
+    "titles": [],
+    "likes": [],
+    "photos": {},
+    "subscribers": [],
+    "videos": {}
+  },
 ]
