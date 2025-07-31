@@ -10,6 +10,7 @@ from PIL import Image
 
 
 
+st.logo("duke.png")
 
 def register_user(username, password):
     if 'users' not in st.session_state:
@@ -27,6 +28,8 @@ if 'username' not in st.session_state:
 if not st.session_state.logged_in:
     # Переключатель между формами входа и регистрации    
     st.set_page_config(layout="wide")
+
+    st.logo("duke.png")
 
     # CSS для фонового изображения
     st.markdown(
@@ -85,6 +88,7 @@ if not st.session_state.logged_in:
     
     else:
         # Форма входа
+        st.logo("duke.png") 
         st.title("🔒 Вход")
         username = st.text_input("Логин")
         password = st.text_input("Пароль", type="password")
@@ -104,7 +108,7 @@ if not st.session_state.logged_in:
     st.stop()
 # Основной интерфейс после авторизации
 st.success(f"✅ Welcome to Alexandria, {st.session_state.username}!")        
-
+st.logo("duke.png")
 main_search = st.text_input("",placeholder = "Search")
 
 
@@ -130,58 +134,74 @@ for user in bd:
         data[user["username"]].append(user["username"])
         data[user["username"]].append(user["likes"])
         data[user["username"]].append(user["photos"])
+        data[user["username"]].append(user["videos"])
 
 #Creating the cookies for the posts
             # Останавливаем приложение, если куки не загружены
+  
+
+# function for counting subscribers of a user
+def count_subs_of_user_(username:str) -> int:
+    with open("pages/posts.json","r") as file:
+        data = json.load(file)
+
+    for user in data:
+        if user["username"] == username:
+            try:
+                return len(user["subscribers"])
+            except Exception as e:
+                return 0
 
 
+def gramar_transalte(count_subs:int) -> str:
+    if count_subs == 0:
+        return "0 подписчиков"
+    if count_subs == 1:
+        return "1 подписчик"
+    if 2 <= count_subs <= 4:
+        return f"{count_subs} подписчика"
+    return f"{count_subs} подписчиков"
 
 
-
-
-
-        
-   
-       
-     
-       
 
 def create_post(title, author, content,likes, tags=None):
-    """
-    Создает красивый пост в Streamlit с заданными параметрами, включая кнопки лайка/дизлайка
     
-    Параметры:
-    - title: заголовок поста
-    - author: автор поста
-    - content: содержание поста
-    - tags: список тегов (необязательный)
-    """
+    count_of_subs = count_subs_of_user_(author)
+    gr = gramar_transalte(count_of_subs)
     if tags is None:
         tags = []
     
     # Создаем уникальные ключи для счетчиков на основе заголовка
     st.markdown(f"""
-    <div style="
-        padding: 20px;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        margin-bottom: 25px;
-    ">
-        <h2 style="margin-top: 0; color: #2c3e50;">{title}</h2>
         <div style="
-            color: #7f8c8d;
-            font-size: 0.85em;
-            margin-bottom: 15px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
         ">
-            Автор: {author}
+            <h2 style="margin-top: 0; color: #2c3e50;">{title}</h2>
+            <div style="
+                color: #7f8c8d;
+                font-size: 0.85em;
+                margin-bottom: 5px;
+            ">
+                Автор: {author}
+            </div>
+            <div style="
+                color: #7f8c8d;
+                font-size: 0.8em;
+                margin-bottom: 15px;
+            ">
+                {gr}
+            </div>
+            <p style="color: #34495e; line-height: 1.6;">{content}</p>
+            {f'<div style="margin-top: 15px; margin-bottom: 15px;">' + 
+            ''.join([f'<span style="background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 12px; margin-right: 5px; font-size: 0.8em;">{tag}</span>' 
+                    for tag in tags]) + '</div>' if tags else ''}
         </div>
-        <p style="color: #34495e; line-height: 1.6;">{content}</p>
-        {f'<div style="margin-top: 15px; margin-bottom: 15px;">' + 
-         ''.join([f'<span style="background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 12px; margin-right: 5px; font-size: 0.8em;">{tag}</span>' 
-                 for tag in tags]) + '</div>' if tags else ''}
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
+
     def is_subed() -> bool:
         with open("pages/posts.json","r") as file:
             s = json.load(file)
@@ -221,15 +241,10 @@ def create_post(title, author, content,likes, tags=None):
                                 
                             
 
-    likes = data[author][-2]
-    title_index = data[author][0].index(title)
-
-    post_likes = likes[title_index].split()[0]
-    post_dislikes = likes[title_index].split()[1]
-
+    
 
     try:
-        pict = data[author][-1]
+        pict = data[author][-2]
         try:
             decoded_img = base64.b64decode(pict[title])
             img = Image.open(BytesIO(decoded_img))
@@ -240,6 +255,18 @@ def create_post(title, author, content,likes, tags=None):
     except Exception as e:
         print(f"Exception photos {e}")    
 
+
+    try:
+        vid = data[author][-1]
+        try:
+            video_bytes = base64.b64decode(vid[title])
+            st.video(video_bytes)
+        except Exception as e:
+            print(f"Error video {e}")
+    except Exception as e:
+        print("Error")         
+
+      
 
     # Инициализация состояний
    
@@ -380,7 +407,8 @@ if not user_ex:
         "titles":[],
         "likes":[],
         "photos":{},
-        "subscribers":[]
+        "subscribers":[],
+        "videos":{}
     })  
     with open("pages/posts.json","w") as file:
         json.dump(ps,file,indent=2,ensure_ascii=False)      
@@ -434,16 +462,20 @@ for user in usernames:
     if main_search != "":
         try:
             for title in data[user][0]:
-                if main_search.lower() in title.lower() or title.lower() in main_search.lower():
+                if main_search.lower() in title.lower() or title.lower() in main_search.lower() or (main_search.lower() in user.lower() or user.lower() in main_search.lower()):
                     t_i = data[user][0].index(title)
+                    
                     create_post(title,user,data[user][1][t_i],data[user][-2],tags = None)
+                    st.divider()
         except Exception as e:
             print(f"Exception {e}")        
     else:
         try:
             title = random.choice(data[user][0])
             t_i_i = data[user][0].index(title)
+            
             create_post(title,user,data[user][1][t_i_i],data[user][-2],tags = None)        
+            st.divider()
         except Exception as e:
             print(f"Exception{e}")        
 
