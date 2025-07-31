@@ -7,6 +7,12 @@ import random
 import base64
 from io import BytesIO
 from PIL import Image
+import pytest
+
+
+
+st.logo("duke.png")
+
 
 def register_user(username, password):
     if 'users' not in st.session_state:
@@ -23,6 +29,7 @@ if not st.session_state.logged_in:
     # Переключатель между формами входа и регистрации    
         
     if st.session_state.show_register:
+        st.logo("duke.png")
         st.title("📝 Регистрация")
         new_username = st.text_input("Новый логин", key="reg_user")
         new_password = st.text_input("Новый пароль", type="password", key="reg_pass1")
@@ -64,6 +71,7 @@ if not st.session_state.logged_in:
     
     else:
         # Форма входа
+        st.logo("duke.png")
         st.title("🔒 Вход в систему")
         username = st.text_input("Логин")
         password = st.text_input("Пароль", type="password")
@@ -114,6 +122,7 @@ for user in bd:
         data[user["username"]].append(user["username"])
         data[user["username"]].append(user["likes"])
         data[user["username"]].append(user["photos"])
+        data[user["username"]].append(user["videos"])
 
 
 russian_government_surnames = [
@@ -151,7 +160,7 @@ def cens(title:str,content:str) -> bool:
     return True
 
 
-def create_post(title, author, content,likes, tags=None):
+def create_post(title, author, content,tags=None):
     """
     Создает красивый пост в Streamlit с заданными параметрами, включая кнопки лайка/дизлайка
     
@@ -205,6 +214,10 @@ def create_post(title, author, content,likes, tags=None):
                         user["photos"].pop(title)
                     except Exception as e:
                         print("This post doesnt have a photo on it") 
+                    try:
+                        user["videos"].pop(title)
+                    except Exception as e:
+                        print(f"Vide delte exc: {e}")        
                     st.success("Success, post deleted")       
                 except Exception as e:
                     st.error(f"Something went wrong,error {e}")         
@@ -212,17 +225,12 @@ def create_post(title, author, content,likes, tags=None):
             json.dump(data,file)
                     
 
-    likes = data[author][-2]
-    title_index = data[author][0].index(title)
-
-    post_likes = likes[title_index].split()[0]
-    post_dislikes = likes[title_index].split()[1]
-
+    
 
     with open("pages/posts.json",'r') as file:
         pictures = json.load(file)
     try:
-        pict = data[author][-1]
+        pict = data[author][-2]
         try:
             decoded_img = base64.b64decode(pict[title])
             img = Image.open(BytesIO(decoded_img))
@@ -233,14 +241,23 @@ def create_post(title, author, content,likes, tags=None):
     except Exception as e:
         print(f"Exception photos {e}")    
 
+    try:
+        vid = data[author][-1]
+        
+        try:
+            video_bytes = base64.b64decode(vid[title])
+            #st.video(video_bytes)
+            try:
+                st.video(video_bytes)
+            except Exception as e:
+                raise
+        except Exception as e:
+            raise
+    except Exception as e:
+        print("Error")           
+
     # Кнопки лайка и дизлайка в одной строке
-    if f"likes_{title}" not in st.session_state:
-        st.session_state[f"likes_{title}"] = int(post_likes)
     
-
-    if f"dislikes_{title}" not in st.session_state:
-        st.session_state[f"dislikes_{title}"] = int(post_dislikes)  
-
     with open("pages/likes.json","r") as file:
         data_like = json.load(file)
     f = 0 # likes
@@ -272,8 +289,25 @@ st.markdown(
     f"<span style='display:inline-block;background-color:#e0e0e0;color:#333;padding:4px 12px;border-radius:12px;font-size:14px;font-weight:bold;'>{subs} subscribers</span>",
     unsafe_allow_html=True
 )
+
 def exi():
     st.session_state.logged_in = False
+
+
+def _SAFE_VIDEO(title:str,author:str,video_coded):
+    with open("pages/posts.json","r") as file:
+        data = json.load(file)
+    for user in data:
+        if user["username"] == author:
+            user["videos"][title] =  video_coded
+    with open("pages/posts.json","w") as file:
+        json.dump(data,file)
+
+
+
+
+
+
 with st.sidebar:
     exit_button = st.button("Leave",on_click = exi)
 
@@ -283,7 +317,7 @@ with st.sidebar:
 with st.form("Create Post"):
     title = st.text_input("Title for the post",placeholder="Create a title")
     post = st.text_input("Make a post",placeholder="Today i...")
-    uploaded_file = st.file_uploader("Add a photo?", type=["jpg", "png", "jpeg"])
+    uploaded_file = st.file_uploader("Add a photo?", type=["jpg", "png", "jpeg","mp4"])
 
     confirm_post = st.form_submit_button("Create")
 
@@ -318,8 +352,17 @@ with st.form("Create Post"):
                                 st.error("Title is empty")    
                             i["likes"].append("0 0")
                             if uploaded_file:
-                                encoded_image = base64.b64encode(uploaded_file.read()).decode("utf-8")
-                                i["photos"][f"{title}"] = encoded_image
+                                if "mp4" in uploaded_file.name:
+                                    vd = uploaded_file.read()
+                                    encoded_video = base64.b64encode(vd).decode("utf-8")
+                                    try:
+                                        _SAFE_VIDEO(title,st.session_state.username,encoded_video)
+                                    except Exception as e:
+                                        continue   
+
+                                else:
+                                    encoded_image = base64.b64encode(uploaded_file.read()).decode("utf-8")
+                                    i["photos"][f"{title}"] = encoded_image
                             with open("pages/likes.json","r") as file:
                                 l = json.load(file)
                             post_ex = False
@@ -334,7 +377,7 @@ with st.form("Create Post"):
 
                             st.success("Post created.Reload the page.")
                         except Exception as e:
-                            st.error(f"Exception {e}")    
+                            st.error(f"Nigger {e}")    
                         
                 with open("pages/posts.json",'w') as file:
                     json.dump(ps,file,indent=2)        
@@ -352,13 +395,15 @@ st.markdown(
 
 
 
-
 s_posts = [] # посты которые мы уже создали
 for i in data[st.session_state.username]:
     for title in data[st.session_state.username][0]:
         if title not in s_posts:
             t_i = data[st.session_state.username][0].index(title)
-            create_post(title,st.session_state.username,data[st.session_state.username][1][t_i],data[st.session_state.username][-1],tags = None)
+           # here is the fucking bug with te index #FIXME
+            
+            create_post(title,st.session_state.username,data[st.session_state.username][1][t_i],tags = None)
+            st.divider()
             s_posts.append(title)
 
 
